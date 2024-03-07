@@ -1,15 +1,10 @@
-#include "emi.h"
-#include <asm-generic/ioctls.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
+#include "../include/termios.h"
 
 /*** data ***/
 
+struct editorConfig editor_config; 
 
-struct editorConfig editor_config;
 /*** terminal functions ***/
-
-
 
 void enableRawMode() {
   if (tcgetattr(STDIN_FILENO, &editor_config.original_termios) == -1) {

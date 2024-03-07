@@ -1,6 +1,8 @@
-#include "emi.h"
+#include "../include/emi.h"
+#include "../include/termios.h"
 
 /*** data ***/
+
 extern struct editorConfig editor_config;
 
 /*** input ***/
@@ -39,7 +41,6 @@ void editorRefreshScreen() {
 }
 
 /*** entry point ***/
-
 
 void initEditor() {
   if (getWindowSize(&editor_config.screen_rows, &editor_config.screen_cols) == -1) {

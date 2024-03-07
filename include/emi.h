@@ -8,7 +8,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <ctype.h>
-#include <sys/ioctl.h>
 #include <unistd.h>
 #include <errno.h>
 #include <termios.h>
@@ -21,19 +20,7 @@
 
 /*** function declarations ***/
 
-void enableRawMode();
-void disableRawMode();
-char editorReadKey();
-void die(const char *s);
-int getWindowSize(int *rows, int *cols);
 void initEditor();
-/*** structs ***/ 
-
-struct editorConfig {
-  int screen_rows;
-  int screen_cols;
-  struct termios original_termios; //Original terminal settings to restore
-};
 
 #endif // !EMI_H
 
