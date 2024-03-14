@@ -1,4 +1,7 @@
 #include "../include/termios.h"
+#include <asm-generic/ioctls.h>
+#include <stdio.h>
+#include <unistd.h>
 
 /*** data ***/
 
@@ -53,12 +56,45 @@ char editorReadKey() {
   return c;
 }
 
-int getWindowSize(int *rows, int *cols) {
-  struct winsize window_size;
-  if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &window_size) == -1 || window_size.ws_col == 0) {
+int getCursorPosition(int *rows, int *cols) {
+  char buffer[32];
+  unsigned count = 0;
+
+  if (write(STDOUT_FILENO, "\x1b[6n", 4) != 4) { //Terminal command for returning position of the cursor
     return -1;
   }
-  *cols = window_size.ws_col;
-  *rows = window_size.ws_row;
+
+  while (count < sizeof(buffer) - 1) {      //Reads terminal's response from STDIN_FILENO till 'R'
+    if (read(STDIN_FILENO, &buffer[count], 1) != 1) {
+      break;
+    }
+    if (buffer[count] == 'R') {
+      break;
+    }
+    count++;
+  }
+  buffer[count] = '\0'; //buffer = \x1b[ROWS;COLS\0
+
+  if (buffer[0] != '\x1b' || buffer[1] != '[') {
+    return -1;
+  }
+  if (sscanf(&buffer[2], "%d;%d", rows, cols) != 2) {
+    return -1;
+  }
+
   return 0;
+}
+
+int getWindowSize(int *rows, int *cols) {
+  struct winsize window_size;
+  if (ioctl(STDOUT_FILENO, TIOCGWINSZ, &window_size) == -1 || window_size.ws_col == 0) { // Detects error with reading terminal the easy way
+    if (write(STDOUT_FILENO, "\x1b[999C\x1b[999B", 12) != 12 ) { // Puts cursor in right bottom
+      return -1;
+    }
+    return getCursorPosition(rows, cols); //Gets position of the cursor as rows and cols
+  } else {
+    *cols = window_size.ws_col; // standard reading of terminal size from TIOCGWINSZ
+    *rows = window_size.ws_row;
+    return 0;
+  }
 }

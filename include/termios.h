@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <sys/ioctl.h>
 #include <errno.h>
+#include <ctype.h>
 
 /*** functions ***/
 void enableRawMode();

@@ -1,5 +1,6 @@
 #include "../include/emi.h"
 #include "../include/termios.h"
+#include <unistd.h>
 
 /*** data ***/
 
@@ -26,8 +27,12 @@ void editorProcessKeyPress() {
 /*** output ***/ 
 
 void editorDrawRows() {
-  for (int y = 0; y < editor_config.screen_cols; y++) {
-    write(STDOUT_FILENO, "~\r\n",3);
+  for (int y = 0; y < editor_config.screen_rows; y++) {
+    write(STDOUT_FILENO, "~", 1);
+
+    if (y < editor_config.screen_rows-1) {
+      write(STDIN_FILENO, "\r\n", 2);
+    }
   }
 }
 
@@ -44,18 +49,17 @@ void editorRefreshScreen() {
 
 void initEditor() {
   if (getWindowSize(&editor_config.screen_rows, &editor_config.screen_cols) == -1) {
-    die("getWindowSize");
+    die("Unable to determine windows size");
   }
 }
 
 int main()
 {
-
   enableRawMode();
   initEditor();
+  editorRefreshScreen();
 
   while(1) {
-    editorRefreshScreen();
     editorProcessKeyPress();
   } 
 
